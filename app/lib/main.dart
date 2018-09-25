@@ -15,12 +15,24 @@ class _HomeState extends State<Home> {
   final _toDoController = TextEditingController();
   List _toDoList = [];
 
-  void _refresh(){
-    setState(() {
-          _toDoController.text = "";
-          _toDoList.clear();
-        });
+  @override
+  void initState() {
+    super.initState();
+
+    _readData().then((data) {
+      setState(() {
+        _toDoList = json.decode(data);
+      });
+    });
   }
+
+  void _refresh() {
+    setState(() {
+      _toDoController.text = "";
+      _toDoList.clear();
+    });
+  }
+
   void _addToDo() {
     setState(() {
       Map<String, dynamic> novaTarefa = Map();
@@ -28,6 +40,7 @@ class _HomeState extends State<Home> {
       novaTarefa["ok"] = false;
       _toDoController.text = "";
       _toDoList.add(novaTarefa);
+      _saveData();
     });
   }
 
@@ -59,10 +72,8 @@ class _HomeState extends State<Home> {
         backgroundColor: Colors.blueAccent,
         centerTitle: true,
         actions: <Widget>[
-          IconButton(
-            onPressed: _refresh,
-            icon: Icon(Icons.refresh))
-          ],
+          IconButton(onPressed: _refresh, icon: Icon(Icons.refresh))
+        ],
       ),
       body: Column(
         children: <Widget>[
@@ -100,6 +111,7 @@ class _HomeState extends State<Home> {
                   onChanged: (c) {
                     setState(() {
                       _toDoList[index]["ok"] = c;
+                      _saveData();
                     });
                   },
                 );
