@@ -15,7 +15,6 @@ class _HomeState extends State<Home> {
   final _toDoController = TextEditingController();
   List _toDoList = [];
 
-  // Ler os arquivos quando iniciar o app.
   @override
   void initState() {
     super.initState();
