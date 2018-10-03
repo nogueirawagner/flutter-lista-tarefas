@@ -14,6 +14,8 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   final _toDoController = TextEditingController();
   List _toDoList = [];
+  Map<String, dynamic> _lastRemoved;
+  int _lastPositionRemoved;
 
   @override
   void initState() {
@@ -80,10 +82,12 @@ class _HomeState extends State<Home> {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.only(top: 10.0),
-              itemCount: _toDoList.length,
-              itemBuilder: buildItem,
+            child: RefreshIndicator(
+              child: ListView.builder(
+                  padding: EdgeInsets.only(top: 10.0),
+                  itemCount: _toDoList.length,
+                  itemBuilder: buildItem),
+              onRefresh: _refreshOrder,
             ),
           )
         ],
@@ -94,12 +98,19 @@ class _HomeState extends State<Home> {
   Widget buildItem(context, index) {
     return Dismissible(
       key: Key(DateTime.now().millisecondsSinceEpoch.toString()),
-      background: Container(
-          color: Colors.redAccent,
+      secondaryBackground: Container(
+          color: Colors.green,
           child: Align(
-              alignment: Alignment(-0.9, 0.0),
-              child: Icon(Icons.delete_forever, color: Colors.white))),
-      direction: DismissDirection.startToEnd,
+            alignment: Alignment(0.9, 0.0),
+            child: Icon(Icons.add, color: Colors.white),
+          )),
+      //direction: DismissDirection.startToEnd,
+      background: Container(
+          color: Colors.red,
+          child: Align(
+            alignment: Alignment(-0.9, 0.0),
+            child: Icon(Icons.delete_outline, color: Colors.white),
+          )),
       child: CheckboxListTile(
         title: Text(_toDoList[index]["title"]),
         value: _toDoList[index]["ok"],
@@ -112,7 +123,44 @@ class _HomeState extends State<Home> {
           });
         },
       ),
+      onDismissed: (direction) {
+        setState(() {
+          _lastRemoved = Map.from(_toDoList[index]);
+          _lastPositionRemoved = index;
+          _toDoList.removeAt(index);
+          _saveData();
+
+          final snack = SnackBar(
+              content: Text("Tarefa \"${_lastRemoved["title"]}\" removida!"),
+              action: SnackBarAction(
+                  label: "Desfazer",
+                  onPressed: () {
+                    setState(() {
+                      _toDoList.insert(_lastPositionRemoved, _lastRemoved);
+                      _saveData();
+                    });
+                  }),
+              duration: Duration(seconds: 2));
+          Scaffold.of(context).showSnackBar(snack);
+        });
+      },
     );
+  }
+
+  Future<Null> _refreshOrder() async {
+    await Future.delayed(
+        Duration(seconds: 1)); // Não precisa de por isso qd tiver o server.
+    setState(() {
+      _toDoList.sort((a, b) {
+        if (a["ok"] && !b["ok"]) return 1;
+        if (!a["ok"] && b["ok"])
+          return -1;
+        else
+          return 0;
+      });
+      _saveData();
+    });
+    return null;
   }
 
   Future<File> _getFile() async {
