@@ -46,17 +46,6 @@ class _HomeState extends State<Home> {
     });
   }
 
-  void _addToDo() {
-    setState(() {
-      Map<String, dynamic> novaTarefa = Map();
-      novaTarefa["title"] = _toDoController.text;
-      novaTarefa["ok"] = false;
-      _toDoController.text = "";
-      _toDoList.add(novaTarefa);
-      _saveData();
-    });
-  }
-
   void _addOrUpdateToDo(bool insert) {
     if (insert) {
       debugPrint("adicionou");
