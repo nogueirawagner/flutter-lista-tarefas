@@ -23,7 +23,6 @@ class _HomeState extends State<Home> {
   String _infoBotao = "Inserir";
   String _infoLabel = "Nova Tarefa";
   BuildContext _context;
-  
 
   @override
   void initState() {
@@ -48,7 +47,6 @@ class _HomeState extends State<Home> {
 
   void _addOrUpdateToDo(bool insert) {
     if (insert) {
-      debugPrint("adicionou");
       setState(() {
         Map<String, dynamic> novaTarefa = Map();
         novaTarefa["title"] = _toDoController.text;
@@ -65,22 +63,24 @@ class _HomeState extends State<Home> {
         _toDoController.text = "";
         _toDoList.insert(_lastPositionUpdated, tarefaEditada);
         _saveData();
-        
+
+        _infoBotao = "Inserir";
+        _infoLabel = "Nova Tarefa";
+        _estaAdd = true;
 
         final snack = SnackBar(
-                content: Text("Tarefa \"${_lastUpdated["title"]}\" editada!"),
-                action: SnackBarAction(
-                    label: "Desfazer",
-                    onPressed: () {
-                      setState(() {
-                        _toDoList.removeAt(_lastPositionUpdated);
-                        _toDoList.insert(_lastPositionUpdated, _lastUpdated);
-                        _saveData();
-                      });
-                    }
-                  ),
-                duration: Duration(seconds: 2));
-            Scaffold.of(_context).showSnackBar(snack);
+            content: Text("Tarefa \"${_lastUpdated["title"]}\" editada!"),
+            action: SnackBarAction(
+                label: "Desfazer",
+                onPressed: () {
+                  setState(() {
+                    _toDoList.removeAt(_lastPositionUpdated);
+                    _toDoList.insert(_lastPositionUpdated, _lastUpdated);
+                    _saveData();
+                  });
+                }),
+            duration: Duration(seconds: 2));
+        Scaffold.of(_context).showSnackBar(snack);
       });
     }
   }
